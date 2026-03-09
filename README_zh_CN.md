@@ -4,7 +4,7 @@
 
 英文说明见 [README.md](README.md)。
 
-## 核心指令一览
+## 🧰 核心指令一览
 
 在 OpenClaw 聊天界面中直接使用这些命令：
 
@@ -15,14 +15,14 @@
 - `/init`：初始化专用 Inbox
 - `/doctor`：检查思源 API 和本地环境状态
 
-## 为什么使用这个技能
+## 🌟 为什么使用这个技能
 
 - 快速记录：直接告诉 Agent 你要记什么，不必先打开思源整理格式。
 - 自动补充：Agent 通常会根据内容生成标签，只保留真正相关的关联笔记，并写入初步分析。
 - 独立空间：AI 生成的笔记统一进入 `Openclaw Inbox`，不改动你原有的笔记本结构。
 - 快速回顾：可以直接在聊天里搜索过去的记录，或者查看最近捕获的 Inbox 笔记。
 
-## 快速部署
+## 🚀 快速部署
 
 使用前请确认：
 
@@ -43,7 +43,7 @@ python -m pip install -r requirements.txt
 
 - 如果思源 API 使用了 Token，或者端口不是默认值，请按下文配置环境变量
 
-## 如何与 Agent 交互
+## 💬 如何与 Agent 交互
 
 技能加载完成后，日常使用都在 OpenClaw 聊天界面里完成。
 
@@ -103,7 +103,7 @@ Agent 通常会：
 /tags
 ```
 
-## 环境变量配置
+## ⚙️ 环境变量配置
 
 这个技能通过本地接口连接思源。你可以使用这些环境变量调整配置：
 
@@ -113,7 +113,7 @@ Agent 通常会：
 - `OPENCLAW_SIYUAN_INDEX_PATH`：索引文档路径。默认：`/index`
 - `OPENCLAW_SIYUAN_SERVER_URL`：本地 helper service 地址。默认：`http://127.0.0.1:6868`
 
-## 开发者 / 命令行接口
+## 🛠️ 开发者 / 命令行接口
 
 这一节只用于调试，或者在没有 Agent 的情况下直接从终端调用脚本。
 
@@ -135,7 +135,7 @@ python scripts/siyuan_ai_notes.py list --limit 10
 python scripts/siyuan_ai_notes.py tags
 ```
 
-## 校验与测试
+## ✅ 校验与测试
 
 ```bash
 python scripts/validate_skill.py
@@ -143,6 +143,6 @@ python -m unittest discover -s tests -p "test_*.py"
 python -m py_compile scripts\siyuan_notes_core.py scripts\siyuan_ai_notes.py scripts\siyuan_server.py scripts\siyuan_client.py
 ```
 
-## 许可证
+## 📄 许可证
 
 本项目使用 MIT License。详见 [LICENSE](LICENSE)。

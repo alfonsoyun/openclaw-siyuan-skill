@@ -4,7 +4,7 @@ OpenClaw SiYuan is a skill for the OpenClaw agent. It gives the agent a dedicate
 
 For a Chinese guide, see [README_zh_CN.md](README_zh_CN.md).
 
-## Cheat Sheet
+## 🧰 Cheat Sheet
 
 Use these commands directly in the OpenClaw chat:
 
@@ -15,14 +15,14 @@ Use these commands directly in the OpenClaw chat:
 - `/init`: initialize the dedicated inbox
 - `/doctor`: check SiYuan API and local environment status
 
-## Why Use This Skill
+## 🌟 Why Use This Skill
 
 - Quick capture: tell the agent to remember something without opening SiYuan manually.
 - Guided enrichment: the agent will usually add tags, keep only truly relevant related notes, and write preliminary analysis.
 - Dedicated workspace: AI-created notes go to `Openclaw Inbox`, so your existing notebooks stay untouched.
 - Fast retrieval: search past notes or inspect recent inbox items from chat.
 
-## Quick Setup
+## 🚀 Quick Setup
 
 Before using the skill, make sure:
 
@@ -43,7 +43,7 @@ Optional configuration:
 
 - if your SiYuan API uses a token or a different port, set the environment variables listed below
 
-## How to Talk to Your Agent
+## 💬 How to Talk to Your Agent
 
 After the skill is loaded, daily use happens in the OpenClaw chat UI.
 
@@ -103,7 +103,7 @@ Inspect collected tags from recent notes:
 /tags
 ```
 
-## Environment Variables
+## ⚙️ Environment Variables
 
 The skill connects to SiYuan locally. You can customize the connection with these environment variables:
 
@@ -113,7 +113,7 @@ The skill connects to SiYuan locally. You can customize the connection with thes
 - `OPENCLAW_SIYUAN_INDEX_PATH`: index document path. Default: `/index`
 - `OPENCLAW_SIYUAN_SERVER_URL`: local helper service URL. Default: `http://127.0.0.1:6868`
 
-## Developer / CLI Reference
+## 🛠️ Developer / CLI Reference
 
 This section is only for debugging or standalone terminal use.
 
@@ -135,7 +135,7 @@ python scripts/siyuan_ai_notes.py list --limit 10
 python scripts/siyuan_ai_notes.py tags
 ```
 
-## Validation and Testing
+## ✅ Validation and Testing
 
 ```bash
 python scripts/validate_skill.py
@@ -143,6 +143,6 @@ python -m unittest discover -s tests -p "test_*.py"
 python -m py_compile scripts\siyuan_notes_core.py scripts\siyuan_ai_notes.py scripts\siyuan_server.py scripts\siyuan_client.py
 ```
 
-## License
+## 📄 License
 
 This repository is licensed under the MIT License. See [LICENSE](LICENSE).
