@@ -3,25 +3,34 @@
 ## Environment
 
 - `SIYUAN_BASE_URL`: SiYuan API base URL. Default: `http://127.0.0.1:6806`
-- `SIYUAN_TOKEN`: Optional SiYuan API token.
+- `SIYUAN_TOKEN`: Optional SiYuan API token
 - `OPENCLAW_SIYUAN_NOTEBOOK`: Notebook name. Default: `Openclaw Inbox`
 - `OPENCLAW_SIYUAN_INDEX_PATH`: Index document path. Default: `/index`
 - `OPENCLAW_SIYUAN_SERVER_URL`: Local helper service URL. Default: `http://127.0.0.1:6868`
 
-## Direct CLI commands
+## Direct CLI Commands
 
 ```bash
 python scripts/siyuan_ai_notes.py init
 python scripts/siyuan_ai_notes.py doctor
-python scripts/siyuan_ai_notes.py cap "学习 SiYuan API" --tag 技术
-python scripts/siyuan_ai_notes.py cap "学习 SiYuan API" --doc-id 20260306010101-abc1234 --ai "补充建议"
+python scripts/siyuan_ai_notes.py cap "Study the SiYuan API"
+python scripts/siyuan_ai_notes.py cap "Study the SiYuan API" --tag tech
+python scripts/siyuan_ai_notes.py cap "Study the SiYuan API" --doc-id 20260306010101-abc1234 --ai "Add follow-up suggestions"
 python scripts/siyuan_ai_notes.py sh "SiYuan" --limit 10
 python scripts/siyuan_ai_notes.py sh "SiYuan" --local
 python scripts/siyuan_ai_notes.py list --limit 10
 python scripts/siyuan_ai_notes.py tags
 ```
 
-## Service endpoints
+## Helper Service
+
+Start the local HTTP helper:
+
+```bash
+python scripts/siyuan_server.py --host 127.0.0.1 --port 6868
+```
+
+Available endpoints:
 
 - `GET /health`
 - `POST /doctor`
@@ -34,7 +43,8 @@ python scripts/siyuan_ai_notes.py tags
 
 ## Validation
 
-- Run `python ..\skill-creator\scripts\quick_validate.py .` from the skill directory to validate `SKILL.md`.
+- Run `python scripts/validate_skill.py` to validate `SKILL.md` frontmatter.
+- Run `python -m unittest discover -s tests -p "test_*.py"` to validate pure workflow helpers.
 - Run `python -m py_compile scripts\siyuan_notes_core.py scripts\siyuan_ai_notes.py scripts\siyuan_server.py scripts\siyuan_client.py` to catch syntax errors.
 
 ## Troubleshooting

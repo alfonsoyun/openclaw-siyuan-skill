@@ -1,129 +1,148 @@
-OpenClaw SiYuan
+# OpenClaw SiYuan
 
-专为 OpenClaw AI 智能体打造的思源笔记（SiYuan）交互技能。
+这是一个给 OpenClaw Agent 使用的思源笔记技能。它会在你的思源工作空间中准备一个独立的 Inbox，帮助 Agent 捕获笔记、补充标签、筛选相关笔记，并写入初步 AI 分析，同时尽量不打扰你原有的笔记结构。
 
-它可以让你的 Agent 在思源笔记中拥有一个专属的“收件箱”（Inbox），在不打乱你原有笔记结构的前提下，帮你记录灵感、自动打标签、寻找上下文关联，并给出初步的 AI 建议。
+英文说明见 [README.md](README.md)。
 
-For the English documentation, see README.md.
+## 核心指令一览
 
-🧰 核心指令一览 (Cheat Sheet)
+在 OpenClaw 聊天界面中直接使用这些命令：
 
-在 OpenClaw 的聊天框中，你可以直接对 AI 使用以下快捷指令：
+- `/cap [内容]`：快速记录一条笔记
+- `/sh [关键词]`：搜索笔记
+- `/inbox`：查看最近捕获到 Inbox 的笔记
+- `/tags`：查看近期笔记中的标签汇总
+- `/init`：初始化专用 Inbox
+- `/doctor`：检查思源 API 和本地环境状态
 
-/cap [内容]：闪电记录笔记（例如：/cap 下周二去博物馆）
+## 为什么使用这个技能
 
-/sh [关键词]：搜索历史笔记（例如：/sh 博物馆）
+- 快速记录：直接告诉 Agent 你要记什么，不必先打开思源整理格式。
+- 自动补充：Agent 通常会根据内容生成标签，只保留真正相关的关联笔记，并写入初步分析。
+- 独立空间：AI 生成的笔记统一进入 `Openclaw Inbox`，不改动你原有的笔记本结构。
+- 快速回顾：可以直接在聊天里搜索过去的记录，或者查看最近捕获的 Inbox 笔记。
 
-/inbox：查看最近被 AI 捕获的笔记列表
+## 快速部署
 
-/tags：查看近期笔记中的标签汇总
+使用前请确认：
 
-/init：首次使用时，初始化专属工作区
-
-/doctor：诊断思源 API 和本地环境状态
-
-🌟 核心场景
-
-告别手动排版和整理，直接在聊天框里向 AI 下达指令：
-
-闪电捕捉：随手发给 AI 一句话（例如：/cap 下周二上午 10 点要去深圳博物馆看展）。
-
-AI 自动丰富：Agent 会尝试提取 #深圳 #展会 等标签，从你的历史笔记中翻出真正相关的记录，并补充“出行准备”或“待办建议”等初步分析。
-
-无感隔离：所有 AI 帮你生成的笔记都会统一放进 Openclaw Inbox 笔记本中，保持你原有资料库的纯净。
-
-快速回顾：让 AI 帮你搜索最近的记录或特定的关键词。
-
-🚀 快速部署
-
-使用前，请确保你的思源笔记桌面端正在运行（并开放了 API 端口），且本地已安装 Python 3.11+。
+- 思源桌面端正在运行，并已开启 API
+- 本地已安装 Python 3.11 或更高版本
 
 安装依赖：
 
+```bash
 python -m pip install -r requirements.txt
+```
 
+加载技能：
 
-加载技能：将此技能目录放入你的 OpenClaw 运行时可加载的位置。
+- 将本仓库放到 OpenClaw 可加载技能的位置
 
-配置参数 (可选)：如果你的思源笔记设置了 API Token 或修改了默认端口，请配置下方提到的环境变量。
+可选配置：
 
-💬 如何与 Agent 交互 (日常使用)
+- 如果思源 API 使用了 Token，或者端口不是默认值，请按下文配置环境变量
 
-环境准备好后，你无需再触碰命令行。所有的操作都在 OpenClaw 的聊天界面中完成。
+## 如何与 Agent 交互
 
-1. 首次初始化
+技能加载完成后，日常使用都在 OpenClaw 聊天界面里完成。
 
-让 Agent 检查环境并建立专属笔记本：
+### 1. 首次初始化
 
-你： "/init" 或 "帮我初始化思源笔记工作区"
+让 Agent 检查环境并准备专用 Inbox：
 
-2. 随手记笔记
+```text
+/init
+```
 
-使用 /cap 命令加上你要记录的内容：
+或者：
 
-你： "/cap 本周五前需要草拟一份春季活动的发布方案。"
+```text
+帮我初始化思源笔记工作区。
+```
 
-✨ 在你发送后，Agent 通常会在后台完成以下工作：
+### 2. 随手记笔记
 
-在 Openclaw Inbox 中新建一篇文档。
+使用 `/cap` 加上你要记录的内容：
 
-根据你的内容，自动生成精准的标签（Tags）。
+```text
+/cap 本周五前需要整理一版春季活动发布方案。
+```
 
-检索你的历史笔记，把真正相关的内容作为双链插入。
+Agent 通常会：
 
-对这则笔记进行初步分析（例如列出下一步行动、潜在风险等）。
+- 在 `Openclaw Inbox` 中新建一篇笔记
+- 根据内容生成标签
+- 只保留真正相关的关联笔记
+- 补充初步 AI 分析，例如风险、下一步行动或准备事项
+- 在写入完成后回复结果
 
-全部排版完成后，在聊天框回复你最终的结果。
+### 3. 搜索与回顾
 
-3. 检索与回顾
+仅在 OpenClaw Inbox 中搜索：
 
-你： "/sh 活动方案 --local" (仅在 AI 专属 Inbox 中搜索相关笔记)
-你： "/sh 深圳" (在思源笔记全局搜索)
-你： "/inbox" (查看最近被 Agent 捕获的笔记列表)
-你： "/tags" (查看近期笔记中的标签汇总)
+```text
+/sh 活动方案 --local
+```
 
-⚙️ 环境变量配置
+在思源全局范围搜索：
 
-此技能通过本地接口与思源笔记通信，你可以通过设置环境变量来修改默认配置：
+```text
+/sh 深圳
+```
 
-SIYUAN_BASE_URL：思源 API 地址（默认：http://127.0.0.1:6806）
+查看最近捕获的笔记：
 
-SIYUAN_TOKEN：思源 API 鉴权 Token（默认为空）
+```text
+/inbox
+```
 
-OPENCLAW_SIYUAN_NOTEBOOK：专属笔记本名称（默认：Openclaw Inbox）
+查看近期笔记中的标签汇总：
 
-OPENCLAW_SIYUAN_INDEX_PATH：索引文档的路径（默认：/index）
+```text
+/tags
+```
 
-OPENCLAW_SIYUAN_SERVER_URL：本地辅助服务地址（默认：http://127.0.0.1:6868）
+## 环境变量配置
 
-🛠️ 开发者 / 命令行接口 (进阶用法)
+这个技能通过本地接口连接思源。你可以使用这些环境变量调整配置：
 
-仅当你想脱离 AI Agent 单独在终端使用，或者进行代码调试时，才需要看这一部分。
+- `SIYUAN_BASE_URL`：思源 API 地址。默认：`http://127.0.0.1:6806`
+- `SIYUAN_TOKEN`：思源 API Token。可选。
+- `OPENCLAW_SIYUAN_NOTEBOOK`：目标笔记本名称。默认：`Openclaw Inbox`
+- `OPENCLAW_SIYUAN_INDEX_PATH`：索引文档路径。默认：`/index`
+- `OPENCLAW_SIYUAN_SERVER_URL`：本地 helper service 地址。默认：`http://127.0.0.1:6868`
 
-OpenClaw 会按具体集成方式调用这些本地能力；你也可以在终端里手动执行：
+## 开发者 / 命令行接口
 
-# 检查 API 和环境状态
+这一节只用于调试，或者在没有 Agent 的情况下直接从终端调用脚本。
+
+根据你的集成方式，OpenClaw 可能会直接调用仓库里的脚本，也可能通过本地 helper service 调用。若要本地测试，可执行：
+
+```bash
+# 检查环境状态
 python scripts/siyuan_ai_notes.py doctor
 
-# 初始化空间
+# 初始化专用 Inbox
 python scripts/siyuan_ai_notes.py init
 
-# 手动触发捕获
-python scripts/siyuan_ai_notes.py cap "下周二去深圳博物馆" --tag 旅游
+# 手动捕获一条笔记
+python scripts/siyuan_ai_notes.py cap "下周二去深圳博物馆" --tag 行程
 
-# 搜索与列表查询
+# 搜索和查看笔记
 python scripts/siyuan_ai_notes.py sh "博物馆" --local
 python scripts/siyuan_ai_notes.py list --limit 10
 python scripts/siyuan_ai_notes.py tags
+```
 
+## 校验与测试
 
-代码校验
-
+```bash
 python scripts/validate_skill.py
 python -m unittest discover -s tests -p "test_*.py"
 python -m py_compile scripts\siyuan_notes_core.py scripts\siyuan_ai_notes.py scripts\siyuan_server.py scripts\siyuan_client.py
+```
 
+## 许可证
 
-许可证
-
-本项目采用 MIT 许可证。详见 LICENSE 文件。
+本项目使用 MIT License。详见 [LICENSE](LICENSE)。
