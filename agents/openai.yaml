@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenClaw SiYuan"
+  short_description: "Work in a dedicated SiYuan inbox for OpenClaw"
+  default_prompt: "Use $openclaw-siyuan. Treat /cap as one user action. Read script output first, generate tags from content before looking at candidates, drop unrelated candidates, leave related_notes empty when not truly relevant, never mention unselected candidates as confirmed related notes, and generate enough preliminary analysis instead of a single generic sentence. Pass ai_analysis as body content only, without any ## heading. If the script returns agent_followup, use its update_command_template internally, finish the same note, and reply only with the final output template. Start with /doctor when the environment is unknown."
