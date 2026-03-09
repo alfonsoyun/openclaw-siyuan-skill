@@ -1,105 +1,129 @@
-# OpenClaw SiYuan
+OpenClaw SiYuan
 
-OpenClaw SiYuan is a skill for capturing and organizing notes in a dedicated SiYuan inbox.
+OpenClaw SiYuan is a skill for the OpenClaw AI agent. It provides your agent with a dedicated, distraction-free inbox inside your SiYuan workspace to capture notes, automatically generate tags, find related historical context, and write preliminary AI analysis.
 
-For a user-oriented Chinese guide, see [README_zh_CN.md](README_zh_CN.md).
+For a user-oriented Chinese guide, see README_zh_CN.md.
 
-It creates notes in `Openclaw Inbox`, maintains `/index`, and supports:
+🧰 Cheat Sheet
 
-- `/doctor` for environment checks
-- `/init` for inbox and index setup
-- `/cap` for note capture with tags, related notes, and AI analysis
-- `/sh` for search
-- `/inbox` for recent notes
-- `/tags` for extracted tags
+You can use these quick commands directly in the OpenClaw chat:
 
-## Typical use cases
+/cap [content]: Capture a quick note (e.g., /cap Visit the museum next Tuesday)
 
-- Capture a quick note such as `Visit the city museum next Tuesday`
-- Save a lightweight work plan such as `Draft launch ideas for the spring campaign`
-- Keep a separate AI-assisted inbox inside SiYuan without changing your existing notebooks
-- Search recent notes and recover useful tags or related references
+/sh [keyword]: Search your notes (e.g., /sh museum)
 
-## Structure
+/inbox: List recent notes captured by the AI
 
-- `SKILL.md`: agent instructions
-- `agents/openai.yaml`: UI metadata
-- `references/`: runtime and development references
-- `scripts/`: CLI, server, client, and shared workflow logic
+/tags: View the collected tag list from recent notes
 
-## Requirements
+/init: Initialize the dedicated workspace (first-time use)
 
-- SiYuan desktop app with API access
-- Python 3.11+
+/doctor: Diagnose SiYuan API and local environment status
 
-Environment variables:
+🌟 Why use this skill?
 
-- `SIYUAN_BASE_URL` default `http://127.0.0.1:6806`
-- `SIYUAN_TOKEN` optional
-- `OPENCLAW_SIYUAN_NOTEBOOK` default `Openclaw Inbox`
-- `OPENCLAW_SIYUAN_INDEX_PATH` default `/index`
-- `OPENCLAW_SIYUAN_SERVER_URL` default `http://127.0.0.1:6868`
+Instead of opening your notebook and formatting everything manually, you can simply chat with your OpenClaw agent:
 
-## Quick start
+Quick Capture: Tell the AI to remember something (/cap Visit the city museum next Tuesday).
 
-Check the environment:
+Auto-Enrichment: The agent tries to generate useful tags, search your history for truly relevant notes, and add a brief AI analysis or action plan.
 
-```bash
+Distraction-Free: All AI-generated notes go straight to a dedicated Openclaw Inbox notebook. Your existing notebooks remain untouched.
+
+Quick Retrieval: Ask the agent to find past notes or show your recent inbox items.
+
+🚀 Quick Setup
+
+To use this skill, you need the SiYuan desktop app running with API access enabled, and Python 3.11+.
+
+Install dependencies:
+
+python -m pip install -r requirements.txt
+
+
+Load the Skill: Place this repository where your OpenClaw runtime can load it.
+
+Configure (Optional): If your SiYuan API requires a token or runs on a different port, set the Environment Variables (see below).
+
+💬 How to Talk to Your Agent (Daily Use)
+
+Once the skill is loaded in OpenClaw, you interact entirely through the chat interface.
+
+1. First-time Initialization
+
+Tell the agent to check the environment and set up the dedicated workspace:
+
+You: "/init" or "Help me initialize the SiYuan workspace."
+
+2. Capture a Note
+
+Use the /cap command followed by your thought, task, or observation:
+
+You: "/cap We need to draft launch ideas for the spring campaign by this Friday."
+
+✨ Behind the scenes, the Agent will usually:
+
+Create a new note in the Openclaw Inbox.
+
+Read the content and generate relevant #tags.
+
+Search your previous notes and link truly relevant ones.
+
+Append a structured AI analysis (e.g., potential risks, next action steps).
+
+Reply to you when the enriched note is fully formatted.
+
+3. Search and Review
+
+Ask the agent to look up information from your notes:
+
+You: "/sh campaign --local" (Searches only inside the OpenClaw inbox)
+You: "/sh museum" (Searches globally across all your SiYuan notebooks)
+You: "/inbox" (Lists your most recently captured notes)
+You: "/tags" (Shows the collected tags from recent notes)
+
+⚙️ Environment Variables
+
+The skill connects to SiYuan locally. You can customize the connection using these environment variables:
+
+SIYUAN_BASE_URL: SiYuan API URL (Default: http://127.0.0.1:6806)
+
+SIYUAN_TOKEN: Your SiYuan API token (Optional)
+
+OPENCLAW_SIYUAN_NOTEBOOK: Target notebook name (Default: Openclaw Inbox)
+
+OPENCLAW_SIYUAN_INDEX_PATH: Index document path (Default: /index)
+
+OPENCLAW_SIYUAN_SERVER_URL: Local helper service URL (Default: http://127.0.0.1:6868)
+
+🛠️ Developer / CLI Reference (Advanced)
+
+You only need this section if you are debugging the skill or want to use the Python scripts standalone without the AI Agent.
+
+Depending on the integration, OpenClaw may invoke the bundled scripts directly or use the helper service. For testing or terminal usage, you can run them directly:
+
+# Check environment health
 python scripts/siyuan_ai_notes.py doctor
-```
 
-Initialize the dedicated inbox and index if needed:
-
-```bash
+# Initialize workspace
 python scripts/siyuan_ai_notes.py init
-```
 
-Capture a new note:
+# Capture a note manually via CLI
+python scripts/siyuan_ai_notes.py cap "Visit the city museum next Tuesday" --tag work
 
-```bash
-python scripts/siyuan_ai_notes.py cap "Visit the city museum next Tuesday"
-```
-
-Search only inside the OpenClaw inbox:
-
-```bash
-python scripts/siyuan_ai_notes.py sh "museum" --local
-```
-
-List recent notes:
-
-```bash
-python scripts/siyuan_ai_notes.py list --limit 10
-```
-
-Inspect extracted tags:
-
-```bash
-python scripts/siyuan_ai_notes.py tags
-```
-
-## CLI reference
-
-```bash
-python scripts/siyuan_ai_notes.py doctor
-python scripts/siyuan_ai_notes.py init
-python scripts/siyuan_ai_notes.py cap "Visit the city museum next Tuesday"
-python scripts/siyuan_ai_notes.py cap "Prepare a short brief for the product launch" --tag work
+# Search via CLI
 python scripts/siyuan_ai_notes.py sh "museum" --local
 python scripts/siyuan_ai_notes.py list --limit 10
 python scripts/siyuan_ai_notes.py tags
-```
 
-## Validation
 
-```bash
-python ..\skill-creator\scripts\quick_validate.py .
+Validation & Testing
+
+python scripts/validate_skill.py
+python -m unittest discover -s tests -p "test_*.py"
 python -m py_compile scripts\siyuan_notes_core.py scripts\siyuan_ai_notes.py scripts\siyuan_server.py scripts\siyuan_client.py
-```
 
-## Notes
 
-- `ai_analysis` should contain body content only, not a `##` heading.
-- Related notes may be empty when no candidate is truly relevant.
-- The default workflow is designed to feel like a single capture action, even if the agent completes internal follow-up steps.
-- This repository is licensed under the MIT License. See [LICENSE](LICENSE).
+License
+
+This repository is licensed under the MIT License. See LICENSE.

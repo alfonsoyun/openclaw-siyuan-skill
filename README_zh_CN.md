@@ -1,181 +1,129 @@
-# OpenClaw SiYuan
+OpenClaw SiYuan
 
-面向 OpenClaw 的思源笔记技能。
+专为 OpenClaw AI 智能体打造的思源笔记（SiYuan）交互技能。
 
-这个技能会在思源里维护一个独立的 `Openclaw Inbox`，用来承接 OpenClaw 生成的新笔记，不打乱用户原有笔记结构。它支持：
+它可以让你的 Agent 在思源笔记中拥有一个专属的“收件箱”（Inbox），在不打乱你原有笔记结构的前提下，帮你记录灵感、自动打标签、寻找上下文关联，并给出初步的 AI 建议。
 
-- 初始化专用空间和 `/index`
-- 用 `/cap` 记录新笔记
-- 自动补充标签、关联笔记和 AI 初步分析
-- 用 `/sh` 搜索
-- 用 `/inbox` 查看最近笔记
-- 用 `/tags` 查看已提取标签
+For the English documentation, see README.md.
 
-## 适合什么场景
+🧰 核心指令一览 (Cheat Sheet)
 
-- 快速记一条待办、计划、观察、灵感
-- 让 OpenClaw 帮你补标签和初步分析
-- 在思源里保留一个专门给 AI 记录和整理的 inbox
+在 OpenClaw 的聊天框中，你可以直接对 AI 使用以下快捷指令：
 
-## 用户流程
+/cap [内容]：闪电记录笔记（例如：/cap 下周二去博物馆）
 
-### 1. 先准备环境
+/sh [关键词]：搜索历史笔记（例如：/sh 博物馆）
 
-需要：
+/inbox：查看最近被 AI 捕获的笔记列表
 
-- 已安装并运行思源笔记
-- 思源 API 可访问
-- Python 3.11+
+/tags：查看近期笔记中的标签汇总
 
-常用环境变量：
+/init：首次使用时，初始化专属工作区
 
-- `SIYUAN_BASE_URL`，默认 `http://127.0.0.1:6806`
-- `SIYUAN_TOKEN`，可选
-- `OPENCLAW_SIYUAN_NOTEBOOK`，默认 `Openclaw Inbox`
-- `OPENCLAW_SIYUAN_INDEX_PATH`，默认 `/index`
-- `OPENCLAW_SIYUAN_SERVER_URL`，默认 `http://127.0.0.1:6868`
+/doctor：诊断思源 API 和本地环境状态
 
-### 2. 第一次使用
+🌟 核心场景
 
-先检查环境：
+告别手动排版和整理，直接在聊天框里向 AI 下达指令：
 
-```bash
+闪电捕捉：随手发给 AI 一句话（例如：/cap 下周二上午 10 点要去深圳博物馆看展）。
+
+AI 自动丰富：Agent 会尝试提取 #深圳 #展会 等标签，从你的历史笔记中翻出真正相关的记录，并补充“出行准备”或“待办建议”等初步分析。
+
+无感隔离：所有 AI 帮你生成的笔记都会统一放进 Openclaw Inbox 笔记本中，保持你原有资料库的纯净。
+
+快速回顾：让 AI 帮你搜索最近的记录或特定的关键词。
+
+🚀 快速部署
+
+使用前，请确保你的思源笔记桌面端正在运行（并开放了 API 端口），且本地已安装 Python 3.11+。
+
+安装依赖：
+
+python -m pip install -r requirements.txt
+
+
+加载技能：将此技能目录放入你的 OpenClaw 运行时可加载的位置。
+
+配置参数 (可选)：如果你的思源笔记设置了 API Token 或修改了默认端口，请配置下方提到的环境变量。
+
+💬 如何与 Agent 交互 (日常使用)
+
+环境准备好后，你无需再触碰命令行。所有的操作都在 OpenClaw 的聊天界面中完成。
+
+1. 首次初始化
+
+让 Agent 检查环境并建立专属笔记本：
+
+你： "/init" 或 "帮我初始化思源笔记工作区"
+
+2. 随手记笔记
+
+使用 /cap 命令加上你要记录的内容：
+
+你： "/cap 本周五前需要草拟一份春季活动的发布方案。"
+
+✨ 在你发送后，Agent 通常会在后台完成以下工作：
+
+在 Openclaw Inbox 中新建一篇文档。
+
+根据你的内容，自动生成精准的标签（Tags）。
+
+检索你的历史笔记，把真正相关的内容作为双链插入。
+
+对这则笔记进行初步分析（例如列出下一步行动、潜在风险等）。
+
+全部排版完成后，在聊天框回复你最终的结果。
+
+3. 检索与回顾
+
+你： "/sh 活动方案 --local" (仅在 AI 专属 Inbox 中搜索相关笔记)
+你： "/sh 深圳" (在思源笔记全局搜索)
+你： "/inbox" (查看最近被 Agent 捕获的笔记列表)
+你： "/tags" (查看近期笔记中的标签汇总)
+
+⚙️ 环境变量配置
+
+此技能通过本地接口与思源笔记通信，你可以通过设置环境变量来修改默认配置：
+
+SIYUAN_BASE_URL：思源 API 地址（默认：http://127.0.0.1:6806）
+
+SIYUAN_TOKEN：思源 API 鉴权 Token（默认为空）
+
+OPENCLAW_SIYUAN_NOTEBOOK：专属笔记本名称（默认：Openclaw Inbox）
+
+OPENCLAW_SIYUAN_INDEX_PATH：索引文档的路径（默认：/index）
+
+OPENCLAW_SIYUAN_SERVER_URL：本地辅助服务地址（默认：http://127.0.0.1:6868）
+
+🛠️ 开发者 / 命令行接口 (进阶用法)
+
+仅当你想脱离 AI Agent 单独在终端使用，或者进行代码调试时，才需要看这一部分。
+
+OpenClaw 会按具体集成方式调用这些本地能力；你也可以在终端里手动执行：
+
+# 检查 API 和环境状态
 python scripts/siyuan_ai_notes.py doctor
-```
 
-如果还没有专用空间，再初始化：
-
-```bash
+# 初始化空间
 python scripts/siyuan_ai_notes.py init
-```
 
-初始化后会创建：
+# 手动触发捕获
+python scripts/siyuan_ai_notes.py cap "下周二去深圳博物馆" --tag 旅游
 
-- 一个独立笔记本 `Openclaw Inbox`
-- 一个索引文档 `/index`
-
-### 3. 日常记录
-
-记录一条新笔记：
-
-```bash
-python scripts/siyuan_ai_notes.py cap "下周二深圳博物馆"
-```
-
-正常情况下，`/cap` 会一次完成这些事：
-
-- 创建笔记
-- 写入 `## 标签`
-- 写入 `## 关联笔记`
-- 写入 `## 💡 建议`
-- 更新 `/index`
-
-如果某些字段还没补齐，脚本会返回：
-
-- `note_created_pending_enrichment`
-- `missing_outputs`
-- `agent_followup`
-
-这表示内部还有后续补全过程，但对用户目标仍然是“完成同一篇笔记”，不是新建另一篇。
-
-### 4. 搜索与回顾
-
-全局搜索：
-
-```bash
-python scripts/siyuan_ai_notes.py sh "深圳"
-```
-
-只搜索 OpenClaw Inbox：
-
-```bash
-python scripts/siyuan_ai_notes.py sh "深圳" --local
-```
-
-查看最近笔记：
-
-```bash
+# 搜索与列表查询
+python scripts/siyuan_ai_notes.py sh "博物馆" --local
 python scripts/siyuan_ai_notes.py list --limit 10
-```
-
-查看标签：
-
-```bash
 python scripts/siyuan_ai_notes.py tags
-```
 
-## 笔记格式
 
-新笔记默认结构：
+代码校验
 
-```md
-# 标题
-
-**时间**: YYYY-MM-DD HH:mm
-**来源**: OpenClaw
-
----
-
-## 内容
-
-用户输入
-
----
-
-## 🏷️ 标签
-
-#tag1 #tag2 #YYYY-MM
-
----
-
-## 关联笔记
-
-- ((doc_id "title"))
-
----
-
-## 💡 建议
-
-AI 初步分析
-
-*Created by OpenClaw*
-```
-
-## 行为说明
-
-### 标签
-
-- 先按内容生成，再参考 `tag_candidates`
-- 明显不相关的候选标签应丢弃
-- 创建阶段不会默认把历史候选标签直接当最终标签
-- 更新阶段如果 `final_tags` 是空列表，不会覆盖现有标签
-
-### 关联笔记
-
-- `related_note_candidates` 只是候选
-- 只有真正相关时才写进 `## 关联笔记`
-- 没有真正相关项时留空是合理结果
-
-### AI 分析
-
-- `ai_analysis` 只传正文，不带 `##` 标题
-- 如果误传了 `## AI 分析` 或 `## 💡 建议`，脚本会在写入前剥离
-- 文档中只保留一个 `## 💡 建议` 区块
-
-## 仓库结构
-
-- `SKILL.md`：给 agent 的核心指令
-- `agents/openai.yaml`：OpenAI / UI 元数据
-- `references/`：运行与开发文档
-- `scripts/`：CLI、server、client、核心逻辑
-
-## 校验
-
-```bash
-python ..\skill-creator\scripts\quick_validate.py .
+python scripts/validate_skill.py
+python -m unittest discover -s tests -p "test_*.py"
 python -m py_compile scripts\siyuan_notes_core.py scripts\siyuan_ai_notes.py scripts\siyuan_server.py scripts\siyuan_client.py
-```
 
-## 许可证
 
-本仓库使用 MIT License。详见 [LICENSE](LICENSE)。
+许可证
+
+本项目采用 MIT 许可证。详见 LICENSE 文件。
