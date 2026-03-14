@@ -19,6 +19,7 @@ SIYUAN_TOKEN = os.getenv("SIYUAN_TOKEN", "")
 NOTEBOOK_NAME = os.getenv("OPENCLAW_SIYUAN_NOTEBOOK", "Openclaw Inbox")
 INDEX_DOC_PATH = os.getenv("OPENCLAW_SIYUAN_INDEX_PATH", "/index")
 SERVER_URL = os.getenv("OPENCLAW_SIYUAN_SERVER_URL", "http://127.0.0.1:6868").rstrip("/")
+SKILL_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 AI_ANALYSIS_SECTION = "💡 建议"
 RELATED_NOTES_SECTION = "关联笔记"
 AI_PLACEHOLDER_TEXT = "- 待补充"
@@ -59,6 +60,18 @@ SUMMARY_SKIP_TEXTS = {
 
 class DocumentValidationError(RuntimeError):
     """Raised when a requested document cannot be safely updated."""
+
+    def __init__(self, code: str, message: str):
+        super().__init__(message)
+        self.code = code
+        self.message = message
+
+    def to_dict(self) -> dict:
+        return {"code": self.code, "message": self.message}
+
+
+class CaptureRequestError(RuntimeError):
+    """Raised when a capture request is internally inconsistent."""
 
     def __init__(self, code: str, message: str):
         super().__init__(message)
@@ -218,8 +231,11 @@ def _normalize_ai_analysis(ai_analysis: Optional[str]) -> Optional[str]:
         if first_normalized in {
             "ai 分析",
             "ai分析",
+            "ai analysis",
             "分析",
             "建议",
+            "suggestion",
+            "suggestions",
             "💡 建议",
             "💡建议",
         }:
@@ -246,14 +262,27 @@ def _missing_cap_outputs(
     return missing
 
 
+def _has_enrichment_payload(
+    *,
+    final_tags: Optional[list[str]],
+    related_notes: Optional[list[dict]],
+    ai_analysis: Optional[str],
+    note_payload: Optional[dict],
+) -> bool:
+    return any(item is not None for item in (final_tags, related_notes, ai_analysis, note_payload))
+
+
 def _is_ai_heading_text(text: str) -> bool:
     clean = re.sub(r"^[#\s]+", "", (text or "").strip()).strip().lower()
     return clean in {
         AI_ANALYSIS_SECTION.lower(),
         "ai 分析",
         "ai分析",
+        "ai analysis",
         "分析",
         "建议",
+        "suggestion",
+        "suggestions",
         "💡建议",
     }
 
@@ -279,18 +308,50 @@ def _agent_followup_instruction(
     required_args = [arg_map[item] for item in missing_outputs if item in arg_map]
     if "tags" in missing_outputs:
         required_args.append("--note-payload-json")
+    helper_payload_fields = ["content", "doc_id"]
+    if "tags" in missing_outputs:
+        helper_payload_fields.extend(["final_tags", "note_payload"])
+    if "related_notes" in missing_outputs:
+        helper_payload_fields.append("related_notes")
+    if "ai_analysis" in missing_outputs:
+        helper_payload_fields.append("ai_analysis")
     return {
         "action": "complete_cap",
         "internal_only": True,
         "rule": "Do not explain this follow-up to the user. Complete the same note first, then reply with the final result only.",
+        "workdir": SKILL_ROOT,
         "required_outputs": missing_outputs,
+        "preferred_transport": "helper_service",
         "write_sections": ["## 标签", "## 关联笔记", "## 💡 建议"],
+        "helper_service_template": {
+            "method": "POST",
+            "url": f"{SERVER_URL}/cap",
+            "health_url": f"{SERVER_URL}/health",
+            "start_command": "python scripts/siyuan_server.py --host 127.0.0.1 --port 6868",
+            "encoding_hint": "If the Windows console shows encoding issues, run the same command with python -X utf8.",
+            "json_fields": helper_payload_fields,
+            "payload": {
+                "content": content,
+                "doc_id": doc_id,
+                "final_tags": [],
+                "related_notes": [],
+                "ai_analysis": "",
+                "note_payload": note_payload,
+            },
+        },
         "update_command_template": {
             "command": "cap",
+            "workdir": SKILL_ROOT,
             "content": content,
             "doc_id": doc_id,
             "note_payload": note_payload,
             "required_args": required_args,
+        },
+        "fallback_cli_template": {
+            "workdir": SKILL_ROOT,
+            "command": "python scripts/siyuan_ai_notes.py cap \"<content>\" --doc-id <doc_id> --tag <tag> --ai \"<body-only-ai-analysis>\"",
+            "encoding_hint": "If the Windows console shows encoding issues, run the same command with python -X utf8.",
+            "rule": "Use this fallback when helper service is unavailable. For structured tags or related notes, prefer helper service over CLI JSON on Windows PowerShell.",
         },
         "user_reply_template": {
             "rule": "Do not mention agent_followup, internal stages, candidate lists, or script coordination.",
@@ -830,6 +891,25 @@ class AINotesManager:
                         ai_extra_blocks.append(next_block)
         return sections
 
+    def _doc_needs_ai_enrichment(self, doc_id: str) -> bool:
+        sections = self._find_note_sections(doc_id)
+        ai_body = sections.get("ai_body")
+        if not ai_body:
+            return True
+        content = str(ai_body.get("content", "") or "").strip()
+        if not content:
+            return True
+        return content == AI_PLACEHOLDER_TEXT
+
+    def _find_pending_doc_by_path(self, doc_path: str) -> Optional[dict]:
+        assert self.notebook is not None
+        doc = self.client.get_doc_by_hpath(self.notebook["id"], doc_path)
+        if not doc:
+            return None
+        if not self._doc_needs_ai_enrichment(doc["id"]):
+            return None
+        return doc
+
     def _update_note_sections(
         self,
         doc_id: str,
@@ -889,7 +969,33 @@ class AINotesManager:
     ) -> dict:
         self.ensure_initialized()
         assert self.notebook is not None
+        now = datetime.now()
         normalized_ai_analysis = _normalize_ai_analysis(ai_analysis)
+        doc_path = self.generate_doc_path(content)
+        fallback_note_payload = self.build_note_payload(
+            content=content,
+            tags=[now.strftime("%Y-%m")],
+            timestamp=now.strftime("%Y-%m-%d %H:%M"),
+            source=source,
+        )
+
+        if note_payload is not None and not existing_doc_id:
+            raise CaptureRequestError(
+                "missing_doc_id_for_followup",
+                "Follow-up note updates must include doc_id; do not call cap with note_payload alone.",
+            )
+
+        if not existing_doc_id and _has_enrichment_payload(
+            final_tags=final_tags,
+            related_notes=related_notes,
+            ai_analysis=normalized_ai_analysis,
+            note_payload=note_payload,
+        ):
+            pending_doc = self._find_pending_doc_by_path(doc_path)
+            if pending_doc:
+                existing_doc_id = pending_doc["id"]
+                if note_payload is None:
+                    note_payload = fallback_note_payload
 
         if existing_doc_id:
             meta = self.validate_doc_id(existing_doc_id, require_workspace=True)
@@ -937,7 +1043,6 @@ class AINotesManager:
                 "ai_analysis": normalized_ai_analysis,
             }
 
-        now = datetime.now()
         related_note_candidates = self.retrieve_related_notes(content)
         tag_candidates = self.retrieve_tag_candidates(content, manual_tags=manual_tags)
         selected_related_notes = self.normalize_related_notes(related_notes)
@@ -957,7 +1062,6 @@ class AINotesManager:
             timestamp=now.strftime("%Y-%m-%d %H:%M"),
             source=source,
         )
-        doc_path = self.generate_doc_path(content)
         markdown = self._build_note_markdown(
             title=base_payload["title"],
             timestamp=base_payload["timestamp"],

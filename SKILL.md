@@ -15,6 +15,15 @@ Use this skill to work in a dedicated SiYuan inbox for OpenClaw.
 
 ## Workflow
 
+- Use the Python entrypoints under `scripts/` for local execution.
+- Run local commands from the skill root: `workspace/skills/openclaw-siyuan/`.
+- If the Windows console shows encoding issues, run the same command with `python -X utf8`.
+- Standard local commands:
+  - `python scripts/siyuan_ai_notes.py doctor`
+  - `python scripts/siyuan_ai_notes.py init`
+  - `python scripts/siyuan_ai_notes.py cap "<content>"`
+- Use the helper service as the standard follow-up path when `/cap` needs structured fields such as `final_tags`, `related_notes`, or `note_payload`.
+- Use the CLI follow-up path for simple body-only updates such as `--doc-id ... --ai "..."`.
 - `/doctor`: check API, notebook, index, and helper service state.
 - `/init`: create the dedicated inbox space and `/index`.
 - `/cap` is a single write action:
@@ -29,9 +38,16 @@ Use this skill to work in a dedicated SiYuan inbox for OpenClaw.
 9. Update `/index`.
 10. Reply only after the note is complete.
 11. If the script returns `agent_followup`, follow it before replying.
+12. Keep the same `doc_id` for follow-up updates to the same `/cap` request.
 - Treat `agent_followup` as internal only.
+- Read `preferred_transport` first. When it is `helper_service`, use the returned HTTP template directly.
 - Use the returned `update_command_template` to complete the same note.
-- Do not explain candidates, stages, or follow-up mechanics to the user.
+- Use the helper service template for structured follow-up updates.
+- If helper service is not running, start it with `python scripts/siyuan_server.py --host 127.0.0.1 --port 6868` from the same skill root.
+- Use the fallback CLI template only when helper service is unavailable.
+- On Windows PowerShell, prefer helper service over CLI JSON flags for `final_tags`, `related_notes`, and `note_payload`.
+- If a follow-up update starts without `doc_id`, recover the pending note first and continue that note.
+- Keep candidates, stages, and follow-up mechanics internal. Reply with the final result only.
 - `/sh`: search notes. Default is global. `--local` narrows to the OpenClaw notebook.
 - `/inbox`: inspect recent notes in the dedicated inbox.
 - `/tags`: inspect extracted tags.

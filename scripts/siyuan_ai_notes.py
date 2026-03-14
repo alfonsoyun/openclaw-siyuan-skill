@@ -8,6 +8,7 @@ import json
 
 from siyuan_notes_core import (
     AINotesManager,
+    CaptureRequestError,
     DocumentValidationError,
     setup_utf8_console,
 )
@@ -70,7 +71,7 @@ def main() -> int:
                 related_notes=related_notes,
                 note_payload=note_payload,
             )
-        except DocumentValidationError as exc:
+        except (DocumentValidationError, CaptureRequestError) as exc:
             print(json.dumps({"ok": False, "error": exc.to_dict()}, ensure_ascii=False, indent=2))
             return 1
 

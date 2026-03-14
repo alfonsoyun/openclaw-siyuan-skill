@@ -9,7 +9,7 @@ import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs, urlparse
 
-from siyuan_notes_core import AINotesManager, DocumentValidationError, setup_utf8_console
+from siyuan_notes_core import AINotesManager, CaptureRequestError, DocumentValidationError, setup_utf8_console
 
 manager: AINotesManager | None = None
 
@@ -96,7 +96,7 @@ class SiYuanHandler(BaseHTTPRequestHandler):
                 self._send_json({"status": "ok", "count": len(tags), "tags": tags})
                 return
             self._send_json({"error": "Not found"}, status=404)
-        except DocumentValidationError as exc:
+        except (DocumentValidationError, CaptureRequestError) as exc:
             self._send_json({"error": exc.message, "code": exc.code}, status=400)
         except Exception as exc:
             self._send_json({"error": str(exc)}, status=500)

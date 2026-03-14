@@ -160,3 +160,17 @@ _Created by OpenClaw_
 - 单次 `/cap` 能写入 `## 标签`、`## 关联笔记`、`## 💡 建议`
 - `/cap` 返回 `agent_followup` 时包含内部更新模板和用户回复模板
 - `/cap` 缺少必要输出时返回 `note_created_pending_enrichment` 和 `missing_outputs`
+
+## 11. Follow-up Execution Notes
+
+- The normal local entrypoints are the Python scripts under `scripts/`.
+- Standard local commands use `python scripts/siyuan_ai_notes.py ...`.
+- When console encoding is unstable on Windows, the same commands may be run with `python -X utf8`.
+- Local commands run from `workspace/skills/openclaw-siyuan/`.
+- Standard `/cap` follow-up uses the helper service first when the update includes structured fields such as `final_tags`, `related_notes`, or `note_payload`.
+- The CLI follow-up path is for simple `--doc-id ... --ai "..."` updates.
+- A follow-up update for the same `/cap` request reuses the same `doc_id`.
+- `agent_followup` should expose a helper-service request template and mark it as the preferred transport for structured follow-up.
+- `agent_followup` should also expose the skill workdir and a fallback CLI template for simple updates.
+- On Windows PowerShell, helper service is the stable default for structured follow-up because CLI JSON quoting is fragile.
+- If a follow-up request contains enrichment data but no `doc_id`, recover the pending note first and continue that note, or return an explicit error before creating anything else.
